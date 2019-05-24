@@ -73,6 +73,18 @@ def sendMail(vote_id):
 	server.sendmail('[email@example.com]', receptints, message)
 	server.close()
 
+with open('new.txt','r') as file:
+	f = file.readlines()
+	for line in f:
+		data = line.split()
+		user = Users.query.filter_by(uname=data[0]).first()
+		if user:
+			continue
+		else:
+			u = Users(uname=data[0],aadhar=data[1],email=data[2])
+			db.session.add(u)
+			db.session.commit()
+
 @app.route('/',methods=['POST','GET'])
 def index():
 	if request.method == 'POST':
@@ -119,7 +131,8 @@ def newvote():
 			db.session.add(vote)
 			db.session.commit()
 			main = Vote.query.filter_by(title=request.form['title']).first()
-			t = Timer(40.0, sendMail,[main.id])
+			mail_time = int(request.form['time'])*86400
+			t = Timer(mail_time, sendMail,[main.id])
 			t.start()
 			for i in range(int(request.form['num'])):
 				if request.form[str(i)]:
